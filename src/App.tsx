@@ -1,26 +1,72 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import Navbar from "./component/Navbar/Navbar";
+import Wishlist from "./pages/Wishlist/Wishlist";
 
-function App() {
+import {
+  Routes,
+  Route,
+  BrowserRouter as Router,
+  Navigate,
+} from "react-router-dom";
+import Login from "./pages/Login/Login";
+import TopMovies from "./pages/TopMovies/TopMovies";
+import SearchMovies from "./pages/Search/Search";
+import Register from "./pages/Register/Register";
+
+const ProtectedRoute = (props: any, { ...options }) => {
+  const authToken: string | null = window.sessionStorage.getItem("auth-token");
+  if (props.condition === "active") {
+    if (authToken) {
+      return <div {...options}>{props.children}</div>;
+    } else {
+      return <Navigate to="/login" />;
+    }
+  } else {
+    if (!authToken) {
+      return <div {...options}>{props.children}</div>;
+    } else {
+      return <Navigate to="/top" />;
+    }
+  }
+};
+
+const App = () => {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Router>
+        <Navbar />
+        <Routes>
+          <Route
+            path="/login"
+            element={
+              <ProtectedRoute condition="inactive">
+                <Login />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <ProtectedRoute condition="inactive">
+                <Register />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/top" element={<TopMovies />} />
+          <Route path="/search" element={<SearchMovies />} />
+          <Route
+            path="/wishlist"
+            element={
+              <ProtectedRoute condition="active">
+                <Wishlist />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/top" />} />
+        </Routes>
+      </Router>
     </div>
   );
-}
+};
 
 export default App;
